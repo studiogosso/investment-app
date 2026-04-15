@@ -1,0 +1,2332 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Investment Lab v2.0</title>
+<meta name="theme-color" content="#08081a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="100万円投資戦略ダッシュボード">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiSW52ZXN0bWVudCBMYWIiLCJzaG9ydF9uYW1lIjoiSW52ZXN0IiwiZGVzY3JpcHRpb24iOiIxMDDkuIflhobnlJ/os4fmiKbnlafjg4Djg4Pjgrfjg6Xjg5zjg7zjg4kiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzA4MDgxYSIsInRoZW1lX2NvbG9yIjoiIzA4MDgxYSIsImljb25zIjpbXX0=">
+<style>
+:root {
+  --bg: #08081a;
+  --bg-secondary: #0e0e24;
+  --card: rgba(18, 18, 46, 0.6);
+  --card-solid: #12122e;
+  --card-hover: rgba(26, 26, 66, 0.7);
+  --glass: rgba(18, 18, 46, 0.45);
+  --glass-border: rgba(155, 109, 255, 0.08);
+  --accent: #9b6dff;
+  --accent-dim: rgba(155,109,255,0.12);
+  --accent-glow: rgba(155,109,255,0.25);
+  --accent-bright: #b48aff;
+  --text: #e8e8ff;
+  --text-dim: #9094ad;
+  --text-muted: #5c6074;
+  --border: rgba(40, 40, 80, 0.5);
+  --green: #43d9a0;
+  --green-dim: rgba(67,217,160,0.1);
+  --red: #ff5c72;
+  --red-dim: rgba(255,92,114,0.1);
+  --yellow: #fbbf24;
+  --yellow-dim: rgba(251,191,36,0.1);
+  --blue: #5aa0f0;
+  --blue-dim: rgba(90,160,240,0.1);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ambient background */
+body::before {
+  content: '';
+  position: fixed;
+  top: -40%;
+  left: -20%;
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(ellipse, rgba(155,109,255,0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -30%;
+  right: -20%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(ellipse, rgba(90,160,240,0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(155,109,255,0.2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(155,109,255,0.4); }
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(8,8,26,0.85);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #6d4aff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(155,109,255,0.3);
+}
+
+.header-title {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #fff, var(--accent-bright));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--green-dim);
+  color: var(--green);
+  letter-spacing: 0.3px;
+}
+
+/* Bottom Nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(8,8,26,0.9);
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  padding: 2px 4px;
+  padding-bottom: max(4px, env(safe-area-inset-bottom));
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 8px 2px 6px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  border-radius: var(--radius-sm);
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-btn svg { width: 20px; height: 20px; transition: var(--transition); }
+.nav-btn:active { transform: scale(0.92); }
+.nav-btn.active { color: var(--accent); }
+.nav-btn.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* Main */
+.main {
+  padding: 12px 12px 80px;
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+@media(min-width: 600px) { .main { padding: 16px 20px 80px; } }
+
+/* Page sections */
+.page { display: none; animation: fadeIn 0.35s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Section title */
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 24px 0 12px;
+  padding-left: 2px;
+}
+
+.section-title:first-child { margin-top: 8px; }
+
+/* Glass card mixin */
+.glass-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Strategy cards */
+.strategy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media(max-width: 420px) { .strategy-grid { grid-template-columns: 1fr; } }
+
+.strat-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.strat-card:hover { background: var(--card-hover); border-color: rgba(155,109,255,0.15); }
+
+.strat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.strat-card.safe::before { background: linear-gradient(90deg, var(--green), #2dd4a0); }
+.strat-card.balanced::before { background: linear-gradient(90deg, var(--blue), #7bb8f0); }
+.strat-card.aggressive::before { background: linear-gradient(90deg, var(--red), #ff8a98); }
+
+.strat-card-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.strat-card-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.strat-card-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.strat-card-return {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+
+.strat-card-return.green { color: var(--green); }
+.strat-card-return.blue { color: var(--blue); }
+.strat-card-return.red { color: var(--red); }
+
+.strat-card-label {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Final plan hero */
+.plan-hero {
+  background: linear-gradient(135deg, rgba(18,18,46,0.8) 0%, rgba(26,16,70,0.6) 100%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 22px 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.plan-hero::after {
+  content: '';
+  position: absolute;
+  top: -30%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(155,109,255,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.plan-hero::before {
+  content: '';
+  position: absolute;
+  bottom: -40%;
+  left: -10%;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(90,160,240,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.plan-hero-title {
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 6px;
+  position: relative;
+}
+
+.plan-hero-sub {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  position: relative;
+}
+
+.plan-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-top: 12px;
+  position: relative;
+}
+
+.plan-badge.france { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(90,160,240,0.15); }
+
+/* Summary stats row */
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+@media(max-width: 400px) { .summary-stats { grid-template-columns: 1fr; } }
+
+.stat-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 14px 12px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.stat-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* Portfolio table */
+.port-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 12px;
+}
+
+.port-table th {
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.port-table td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(30,30,58,0.3);
+  vertical-align: middle;
+}
+
+.port-table tr:last-child td { border-bottom: none; font-weight: 700; }
+
+.port-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(155,109,255,0.08);
+  overflow: hidden;
+}
+
+.port-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), #6d4aff);
+  transition: width 0.8s ease;
+}
+
+/* Accordion */
+.accordion {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: var(--transition);
+}
+
+.accordion:hover { border-color: rgba(155,109,255,0.12); }
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.accordion-header:hover { background: var(--card-hover); }
+.accordion-header:active { transform: scale(0.995); }
+
+.accordion-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.accordion-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.accordion-cat {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.cat-digital { background: var(--accent-dim); color: var(--accent); }
+.cat-invest { background: var(--green-dim); color: var(--green); }
+.cat-real { background: var(--yellow-dim); color: var(--yellow); }
+.cat-platform { background: var(--blue-dim); color: var(--blue); }
+
+.accordion-arrow {
+  width: 20px;
+  height: 20px;
+  color: var(--text-muted);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.accordion.open .accordion-arrow { transform: rotate(180deg); }
+
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion.open .accordion-body { max-height: 800px; }
+
+.accordion-content {
+  padding: 0 16px 16px;
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.accordion-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.accordion-content li {
+  padding: 4px 0;
+  padding-left: 16px;
+  position: relative;
+}
+
+.accordion-content li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 11px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.4;
+}
+
+.accordion-content .detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(30,30,58,0.2);
+  gap: 8px;
+}
+
+.accordion-content .detail-label { color: var(--text-muted); flex-shrink: 0; }
+.accordion-content .detail-value { color: var(--text); font-weight: 600; text-align: right; }
+
+/* Ranking */
+.rank-item {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: var(--transition);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.rank-item:hover { background: var(--card-hover); border-color: rgba(155,109,255,0.12); }
+
+.rank-pos {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.rank-pos.gold { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; box-shadow: 0 2px 8px rgba(251,191,36,0.3); }
+.rank-pos.silver { background: linear-gradient(135deg, #9ca3af, #6b7280); color: #fff; }
+.rank-pos.bronze { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
+.rank-pos.normal { background: var(--accent-dim); color: var(--accent); }
+
+.rank-info { flex: 1; min-width: 0; }
+
+.rank-name {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rank-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.rank-bar-wrap {
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.rank-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(155,109,255,0.08);
+  overflow: hidden;
+}
+
+.rank-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease;
+}
+
+.rank-stars {
+  font-size: 11px;
+  color: var(--yellow);
+  text-align: right;
+  white-space: nowrap;
+  flex-shrink: 0;
+  width: 56px;
+}
+
+/* Checklist */
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.check-item:hover { background: var(--card-hover); }
+.check-item:active { transform: scale(0.98); }
+.check-item.checked { opacity: 0.45; }
+.check-item.checked .check-text { text-decoration: line-through; }
+
+.check-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  margin-top: 1px;
+}
+
+.check-item.checked .check-box {
+  background: linear-gradient(135deg, var(--accent), #6d4aff);
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.check-box svg {
+  width: 12px;
+  height: 12px;
+  color: #fff;
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.check-item.checked .check-box svg { opacity: 1; }
+
+.check-text {
+  font-size: 12px;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.check-phase {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.check-progress-wrap {
+  margin: 12px 0;
+}
+
+.check-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.check-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(155,109,255,0.08);
+  overflow: hidden;
+}
+
+.check-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--green));
+  transition: width 0.5s ease;
+  box-shadow: 0 0 8px rgba(155,109,255,0.2);
+}
+
+/* Simulator */
+.sim-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.sim-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+@media(max-width: 500px) { .sim-inputs { grid-template-columns: 1fr; } }
+
+.sim-field label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.sim-field input, .sim-field select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  transition: var(--transition);
+  font-family: inherit;
+  -webkit-appearance: none;
+}
+
+.sim-field input:focus, .sim-field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim), 0 0 16px rgba(155,109,255,0.1);
+}
+
+.sim-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--accent), #6d4aff);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.sim-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1));
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.sim-btn:hover::after { opacity: 1; }
+.sim-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+.sim-btn:active { transform: scale(0.98); }
+
+.sim-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  margin-top: 16px;
+}
+
+.sim-canvas-wrap canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-sm);
+}
+
+.sim-results {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+@media(max-width: 400px) { .sim-results { grid-template-columns: 1fr; } }
+
+.sim-result-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 14px 12px;
+  text-align: center;
+}
+
+.sim-result-value {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--green);
+  letter-spacing: -0.5px;
+}
+
+.sim-result-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Growth table */
+.growth-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-top: 12px;
+}
+
+.growth-table th {
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+}
+
+.growth-table td {
+  padding: 8px;
+  border-bottom: 1px solid rgba(30,30,58,0.2);
+}
+
+.growth-table td:nth-child(2),
+.growth-table td:nth-child(3),
+.growth-table td:nth-child(4) {
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.growth-table th:nth-child(2),
+.growth-table th:nth-child(3),
+.growth-table th:nth-child(4) { text-align: right; }
+
+/* Allocation cards */
+.alloc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+@media(max-width: 400px) { .alloc-grid { grid-template-columns: 1fr; } }
+
+.alloc-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.alloc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.alloc-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.alloc-pct {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.alloc-amt {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Scenario badges */
+.scenario-row {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.scenario-badge {
+  flex: 1;
+  min-width: 100px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  border: 1px solid var(--glass-border);
+}
+
+.scenario-badge.standard { background: var(--green-dim); }
+.scenario-badge.conservative { background: var(--blue-dim); }
+.scenario-badge.worst { background: var(--red-dim); }
+
+.scenario-badge .sc-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.scenario-badge.standard .sc-label { color: var(--green); }
+.scenario-badge.conservative .sc-label { color: var(--blue); }
+.scenario-badge.worst .sc-label { color: var(--red); }
+
+.scenario-badge .sc-value {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.scenario-badge.standard .sc-value { color: var(--green); }
+.scenario-badge.conservative .sc-value { color: var(--blue); }
+.scenario-badge.worst .sc-value { color: var(--red); }
+
+/* Currency converter */
+.converter-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.converter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media(max-width: 420px) { .converter-row { flex-direction: column; } }
+
+.converter-input-wrap {
+  flex: 1;
+  position: relative;
+  width: 100%;
+}
+
+.converter-input-wrap input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 10px 50px 10px 12px;
+  font-size: 16px;
+  font-weight: 700;
+  outline: none;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.converter-input-wrap input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.converter-currency {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.converter-arrow {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.converter-result {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* Disclaimer */
+.disclaimer {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  padding: 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  margin-top: 20px;
+  background: rgba(8,8,26,0.3);
+}
+
+/* Helpers */
+.mt-8 { margin-top: 8px; }
+.mb-8 { margin-bottom: 8px; }
+.fw-800 { font-weight: 800; }
+.text-accent { color: var(--accent); }
+
+/* Chart tooltip */
+.chart-tooltip {
+  position: absolute;
+  background: rgba(18,18,46,0.95);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 10;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.chart-tooltip.visible { opacity: 1; }
+
+/* Preset buttons */
+.strat-card[onclick] { cursor: pointer; }
+.strat-card[onclick]:active { transform: scale(0.97); }
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(18,18,46,0.95);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  z-index: 200;
+  opacity: 0;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Reset button */
+.action-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.action-btns .sim-btn {
+  flex: 1;
+  background: var(--glass);
+  color: var(--text-dim);
+  border: 1px solid var(--glass-border);
+  font-size: 12px;
+  padding: 10px;
+}
+
+.action-btns .sim-btn:hover { background: var(--card-hover); border-color: rgba(155,109,255,0.15); }
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-left">
+    <div class="header-logo">IL</div>
+    <div>
+      <div class="header-title">Investment Lab</div>
+      <div class="header-sub">100万円 投資戦略ダッシュボード v2.0</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="header-badge" id="header-status">FR版</span>
+  </div>
+</header>
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- PAGE: Strategy Overview -->
+  <div class="page active" id="page-strategy">
+
+    <!-- Plan Hero -->
+    <div class="plan-hero">
+      <div class="plan-hero-title">最終運用プラン</div>
+      <div class="plan-hero-sub">
+        全否定レビュー反映済み。フランス在住者向けの現実路線。<br>
+        PEA + Assurance-vie + Livret A のインデックス投資に集中。<br>
+        20年間放置で標準2.9倍、最悪でも1.7倍。
+      </div>
+      <span class="plan-badge france">フランス在住者版</span>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="summary-stats">
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--accent)">100万</div>
+        <div class="stat-label">初期投資額</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--green)">289万</div>
+        <div class="stat-label">20年後 (標準)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--blue)">+189%</div>
+        <div class="stat-label">期待リターン</div>
+      </div>
+    </div>
+
+    <!-- Portfolio Allocation -->
+    <div class="section-title">ポートフォリオ配分</div>
+    <table class="port-table">
+      <thead>
+        <tr>
+          <th>優先</th>
+          <th>口座・商品</th>
+          <th>金額</th>
+          <th>配分</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--accent);font-weight:800">1</td>
+          <td>PEA / CW8 (MSCI World)</td>
+          <td>40万</td>
+          <td>
+            <div class="port-bar"><div class="port-bar-fill" style="width:40%"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td style="color:var(--accent);font-weight:800">2</td>
+          <td>PEA / PE500 (S&P 500)</td>
+          <td>15万</td>
+          <td>
+            <div class="port-bar"><div class="port-bar-fill" style="width:15%"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td style="color:var(--accent);font-weight:800">3</td>
+          <td>Assurance-vie / UC株式型</td>
+          <td>30万</td>
+          <td>
+            <div class="port-bar"><div class="port-bar-fill" style="width:30%"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td style="color:var(--green);font-weight:800">4</td>
+          <td>Livret A (非課税2.4%)</td>
+          <td>10万</td>
+          <td>
+            <div class="port-bar"><div class="port-bar-fill" style="width:10%;background:var(--green)"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-muted);font-weight:800">5</td>
+          <td>現金（緊急資金）</td>
+          <td>5万</td>
+          <td>
+            <div class="port-bar"><div class="port-bar-fill" style="width:5%;background:var(--text-muted)"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td style="color:var(--text)">合計</td>
+          <td style="color:var(--accent)">100万</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 20yr Scenarios -->
+    <div class="section-title">20年後の成長予測（税引後）</div>
+    <div class="scenario-row">
+      <div class="scenario-badge standard">
+        <div class="sc-label">標準</div>
+        <div class="sc-value">289万</div>
+      </div>
+      <div class="scenario-badge conservative">
+        <div class="sc-label">保守</div>
+        <div class="sc-value">200万</div>
+      </div>
+      <div class="scenario-badge worst">
+        <div class="sc-label">最悪</div>
+        <div class="sc-value">170万</div>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto;">
+    <table class="growth-table">
+      <thead>
+        <tr><th>時点</th><th>標準</th><th>保守</th><th>最悪</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1年後</td><td style="color:var(--green)">104.6万</td><td>102.5万</td><td style="color:var(--red)">87万</td></tr>
+        <tr><td>3年後</td><td style="color:var(--green)">115.0万</td><td>108.5万</td><td style="color:var(--red)">78万</td></tr>
+        <tr><td>5年後</td><td style="color:var(--green)">127.5万</td><td>116.0万</td><td style="color:var(--red)">85万</td></tr>
+        <tr><td>10年後</td><td style="color:var(--green)">167.5万</td><td>140.0万</td><td>125万</td></tr>
+        <tr><td>20年後</td><td style="color:var(--green)">289.3万</td><td>200.0万</td><td>170万</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <!-- 3 Strategy Types -->
+    <div class="section-title">日本居住者向け 3つの配分プラン</div>
+    <div class="strategy-grid">
+      <div class="strat-card safe">
+        <div class="strat-card-icon">&#x1F6E1;</div>
+        <div class="strat-card-name">超安全型</div>
+        <div class="strat-card-desc">元本割れリスク最小。NISA+国債+金ETF+J-REIT+Notionテンプレ</div>
+        <div class="strat-card-return green">月3〜9万</div>
+        <div class="strat-card-label">月間見込収益（安定後）</div>
+      </div>
+      <div class="strat-card balanced">
+        <div class="strat-card-icon">&#x2696;</div>
+        <div class="strat-card-name">バランス型</div>
+        <div class="strat-card-desc">守りと攻めの最適解。NISA+Kindle+Notion+Udemy+GPTs+VYM</div>
+        <div class="strat-card-return blue">月7〜15万</div>
+        <div class="strat-card-label">月間見込収益（6ヶ月後）</div>
+      </div>
+      <div class="strat-card aggressive">
+        <div class="strat-card-icon">&#x1F680;</div>
+        <div class="strat-card-name">攻め型</div>
+        <div class="strat-card-desc">最大リターン狙い。Kindle+SaaS+ガチャ+Udemy+Notion+NISA</div>
+        <div class="strat-card-return red">月15〜25万</div>
+        <div class="strat-card-label">月間見込収益（6〜12ヶ月後）</div>
+      </div>
+      <div class="strat-card" style="border-color: rgba(155,109,255,0.15);">
+        <div class="strat-card-icon">&#x1F30D;</div>
+        <div class="strat-card-name">現実プラン（採用）</div>
+        <div class="strat-card-desc">フランス在住。PEA+AV+Livret A。月間収入はほぼゼロ。複利で増やす</div>
+        <div class="strat-card-return text-accent">年4〜6%</div>
+        <div class="strat-card-label">年間期待リターン（税引後）</div>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      ※ 本ダッシュボードは情報提供を目的としたものであり、特定の金融商品の購入を推奨するものではありません。投資判断はご自身の責任で行ってください。
+    </div>
+  </div>
+
+  <!-- PAGE: Research Areas -->
+  <div class="page" id="page-research">
+    <div class="section-title">リサーチ概要 — 7つの領域</div>
+
+    <!-- B01: Digital Assets -->
+    <div class="accordion" data-id="b01">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-num">01</div>
+        <div class="accordion-title">デジタル資産・自動収益</div>
+        <span class="accordion-cat cat-digital">B01</span>
+        <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-content">
+          <p style="margin-bottom:8px;">14モデルを調査。初期投資100万円・月稼働2〜3時間で運用可能なデジタルプロダクト系パッシブインカム。</p>
+          <ul>
+            <li><strong>Notionテンプレート販売</strong> — 日本語市場ブルーオーシャン。月3〜80万円。おすすめ度★5</li>
+            <li><strong>Canvaテンプレート販売</strong> — SNS投稿テンプレが高需要。月2〜60万円。★4</li>
+            <li><strong>AI電子書籍KDP出版</strong> — AI活用で量産可能だが規制強化中。月1〜50万円。★4</li>
+            <li><strong>Micro-SaaS</strong> — 収益ポテンシャル最大。月5〜200万円。★4</li>
+            <li><strong>GPTs/AIチャットボット</strong> — 黎明期の先行者利益。月1〜80万円。★4</li>
+            <li><strong>Udemy/オンライン講座</strong> — 一度収録で永続収益。月2〜100万円。★5</li>
+            <li><strong>API連携自動化ツール</strong> — Zapier/Makeテンプレ販売。月2〜60万円。★4</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- B02: Investment -->
+    <div class="accordion" data-id="b02">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-num">02</div>
+        <div class="accordion-title">投資・金融・資産運用</div>
+        <span class="accordion-cat cat-invest">B02</span>
+        <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-content">
+          <p style="margin-bottom:8px;">13モデルを調査。証券口座開設→放置の完全パッシブ型。日本在住者はNISA/iDeCoが最強。</p>
+          <ul>
+            <li><strong>新NISA つみたて投資枠</strong> — eMAXIS Slim オルカン/S&P500。非課税×放置。★5</li>
+            <li><strong>新NISA 成長投資枠</strong> — 年360万円まで非課税投資。★5</li>
+            <li><strong>国内高配当株ETF</strong> — 1489/1343等。配当3〜4%。★4</li>
+            <li><strong>米国高配当ETF</strong> — VYM/HDV/SPYD。配当2.5〜3.5%。★4</li>
+            <li><strong>J-REIT</strong> — 分配金4〜5%。不動産間接投資。★4</li>
+            <li><strong>ロボアドバイザー</strong> — WealthNavi等。年3〜10%。★4</li>
+            <li><strong>iDeCo</strong> — 節税効果含み実質年20〜30%。60歳まで引出不可。★4</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- B03: Real Business -->
+    <div class="accordion" data-id="b03">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-num">03</div>
+        <div class="accordion-title">放置系リアルビジネス</div>
+        <span class="accordion-cat cat-real">B03</span>
+        <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-content">
+          <p style="margin-bottom:8px;">14モデルを調査。自動販売機・ガチャガチャなど設置型の無人ビジネス。立地依存度が高い。</p>
+          <ul>
+            <li><strong>飲料自動販売機</strong> — フルオペ型で稼働ほぼゼロ。月1〜5万円/台。★4</li>
+            <li><strong>ガチャガチャ</strong> — 100万で20台分散。月6〜20万円。費用対効果最強。★5</li>
+            <li><strong>冷凍食品自販機</strong> — 中古機で参入。月3〜20万円。ブームの波あり。★3</li>
+            <li><strong>駐車場経営</strong> — 土地があれば月3〜20万円。稼働ほぼゼロ。★3</li>
+            <li><strong>トランクルーム</strong> — 屋外コンテナ型。月約2〜4万円。★3</li>
+            <li><strong>無人販売所</strong> — 野菜・冷凍餃子。月2〜15万円。★3</li>
+          </ul>
+          <p style="margin-top:8px;color:var(--red);">※ フランスから日本の現地交渉は不可能 → 最終プランでは全て除外</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- B04: Platform -->
+    <div class="accordion" data-id="b04">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-num">04</div>
+        <div class="accordion-title">プラットフォーム活用</div>
+        <span class="accordion-cat cat-platform">B04</span>
+        <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-content">
+          <p style="margin-bottom:8px;">Kindle/Udemy/note/Etsy等のプラットフォームを活用した販売モデル。</p>
+          <ul>
+            <li><strong>Kindle出版</strong> — 冊数積上げで安定。外注で自動化。月1〜40万円。★5</li>
+            <li><strong>note/Brain有料コンテンツ</strong> — 渾身の記事数本で継続収益。月1〜50万円。★4</li>
+            <li><strong>Print on Demand</strong> — 在庫不要のグッズ販売。月0.5〜30万円。★4</li>
+            <li><strong>ストックフォト/動画</strong> — AI生成素材。月0.5〜20万円。★4</li>
+            <li><strong>Amazon FBA</strong> — 物販。稼働時間が多い。月3〜50万円。★3</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Denied Models -->
+    <div class="accordion" data-id="denied">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-num" style="background:var(--red-dim);color:var(--red);">X</div>
+        <div class="accordion-title">否定されたモデル一覧</div>
+        <span class="accordion-cat" style="background:var(--red-dim);color:var(--red);">除外</span>
+        <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-content">
+          <p style="margin-bottom:8px;">全否定レビュー(B07)で淘汰されたモデル。フランス在住者として致命的な理由あり。</p>
+          <ul>
+            <li><strong>NISA / iDeCo / 国内証券</strong> — フランス在住者は利用不可</li>
+            <li><strong>Notionテンプレ販売</strong> — 市場が小さい。月0〜5,000円が現実</li>
+            <li><strong>SEOアフィリエイト</strong> — Google HCUで死亡済み</li>
+            <li><strong>Micro-SaaS</strong> — 100万円では開発すらできない</li>
+            <li><strong>Shopify / FBA</strong> — 広告運用が月20時間以上必要</li>
+            <li><strong>自販機 / ガチャ / 駐車場</strong> — フランスから現地交渉不可能</li>
+            <li><strong>FX自動売買</strong> — 良い年+10%、悪い年-100%。期待値ゼロ</li>
+            <li><strong>仮想通貨ステーキング</strong> — 100人中40人が元本割れ</li>
+            <li><strong>GPTs / NFT</strong> — プラットフォーム方針変更で無価値化</li>
+            <li><strong>YouTube (ファセレス)</strong> — 収益化達成率5%</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- PEA deep dive -->
+    <div class="accordion" data-id="pea">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-num" style="background:var(--blue-dim);color:var(--blue);">FR</div>
+        <div class="accordion-title">PEA / Assurance-vie 詳細</div>
+        <span class="accordion-cat" style="background:var(--blue-dim);color:var(--blue);">仏制度</span>
+        <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-content">
+          <p style="margin-bottom:8px;">フランス在住者が利用可能な税制優遇口座の詳細。</p>
+          <div class="detail-row"><span class="detail-label">PEA (Plan d'Epargne en Actions)</span><span class="detail-value">5年後に税率17.2%</span></div>
+          <div class="detail-row"><span class="detail-label">推奨証券会社</span><span class="detail-value">Boursorama / Bourse Direct</span></div>
+          <div class="detail-row"><span class="detail-label">推奨ETF (World)</span><span class="detail-value">Amundi MSCI World (CW8)</span></div>
+          <div class="detail-row"><span class="detail-label">推奨ETF (US)</span><span class="detail-value">BNP Paribas Easy S&P500 (PE500)</span></div>
+          <div class="detail-row"><span class="detail-label">Assurance-vie</span><span class="detail-value">8年後に税率24.7%</span></div>
+          <div class="detail-row"><span class="detail-label">推奨AV</span><span class="detail-value">Linxea Spirit 2</span></div>
+          <div class="detail-row"><span class="detail-label">Livret A</span><span class="detail-value">非課税 年利2.4%</span></div>
+          <div class="detail-row"><span class="detail-label">両替</span><span class="detail-value">Wise推奨（銀行窓口は手数料高い）</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kindle side project -->
+    <div class="accordion" data-id="kindle">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-num" style="background:var(--green-dim);color:var(--green);">SP</div>
+        <div class="accordion-title">サイドプロジェクト: Kindle出版</div>
+        <span class="accordion-cat cat-platform">唯一生存</span>
+        <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-content">
+          <p style="margin-bottom:8px;">全否定レビューで唯一「生存率25%」を獲得。投資ではなく余った時間の活用。</p>
+          <div class="detail-row"><span class="detail-label">初期投資</span><span class="detail-value">0円（生活費から捻出）</span></div>
+          <div class="detail-row"><span class="detail-label">月間稼働</span><span class="detail-value">2〜3時間</span></div>
+          <div class="detail-row"><span class="detail-label">目標</span><span class="detail-value">1年で10冊 → 月0〜5,000円</span></div>
+          <div class="detail-row"><span class="detail-label">ジャンル</span><span class="detail-value">フランス生活、海外在住者向け実用書</span></div>
+          <div class="detail-row"><span class="detail-label">現実</span><span class="detail-value">月5,000円安定なら大成功</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: Ranking -->
+  <div class="page" id="page-ranking">
+    <div class="section-title">総合ランキング TOP 10</div>
+    <div id="ranking-list"></div>
+
+    <div class="section-title" style="margin-top:24px;">カテゴリ別 分布</div>
+    <div class="alloc-grid">
+      <div class="alloc-card">
+        <div class="alloc-header">
+          <span class="alloc-name" style="color:var(--accent)">デジタル資産</span>
+          <span class="alloc-pct" style="color:var(--accent)">14</span>
+        </div>
+        <div class="alloc-amt">B01: Notion, Canva, SaaS, GPTs 等</div>
+      </div>
+      <div class="alloc-card">
+        <div class="alloc-header">
+          <span class="alloc-name" style="color:var(--green)">投資・金融</span>
+          <span class="alloc-pct" style="color:var(--green)">13</span>
+        </div>
+        <div class="alloc-amt">B02: NISA, iDeCo, ETF, REIT 等</div>
+      </div>
+      <div class="alloc-card">
+        <div class="alloc-header">
+          <span class="alloc-name" style="color:var(--yellow)">リアルビジネス</span>
+          <span class="alloc-pct" style="color:var(--yellow)">14</span>
+        </div>
+        <div class="alloc-amt">B03: 自販機, ガチャ, 駐車場 等</div>
+      </div>
+      <div class="alloc-card">
+        <div class="alloc-header">
+          <span class="alloc-name" style="color:var(--blue)">プラットフォーム</span>
+          <span class="alloc-pct" style="color:var(--blue)">10</span>
+        </div>
+        <div class="alloc-amt">B04: Kindle, note, FBA 等</div>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      ※ 日本在住 / 初期投資100万円 / 月稼働2〜3時間 / 合法・クリーンの条件で総合評価。フランス在住者は最終プランのPEA+AV戦略を採用。
+    </div>
+  </div>
+
+  <!-- PAGE: Action Items -->
+  <div class="page" id="page-actions">
+    <div class="check-progress-wrap">
+      <div class="check-progress-label">
+        <span>進捗状況</span>
+        <span id="progress-text">0 / 0</span>
+      </div>
+      <div class="check-progress">
+        <div class="check-progress-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="section-title">Phase 1: 今週中</div>
+    <div id="phase1-items"></div>
+
+    <div class="section-title">Phase 2: 1ヶ月以内</div>
+    <div id="phase2-items"></div>
+
+    <div class="section-title">Phase 3: 3ヶ月以内</div>
+    <div id="phase3-items"></div>
+
+    <div class="action-btns">
+      <button class="sim-btn" onclick="exportChecklist()">進捗エクスポート</button>
+      <button class="sim-btn" onclick="importChecklist()">進捗インポート</button>
+      <button class="sim-btn" onclick="resetChecklist()" style="color:var(--red);">リセット</button>
+    </div>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+  </div>
+
+  <!-- PAGE: Simulator -->
+  <div class="page" id="page-simulator">
+    <div class="section-title">複利成長シミュレーター</div>
+    <div class="sim-card">
+      <div class="sim-inputs">
+        <div class="sim-field">
+          <label>初期投資額（万円）</label>
+          <input type="number" id="sim-amount" value="100" min="1" max="10000">
+        </div>
+        <div class="sim-field">
+          <label>年間利回り（%）</label>
+          <input type="number" id="sim-rate" value="6" min="0" max="50" step="0.1">
+        </div>
+        <div class="sim-field">
+          <label>投資期間（年）</label>
+          <input type="number" id="sim-years" value="20" min="1" max="50">
+        </div>
+      </div>
+      <div class="sim-inputs" style="margin-bottom:12px;">
+        <div class="sim-field">
+          <label>毎月積立額（万円）</label>
+          <input type="number" id="sim-monthly" value="0" min="0" max="100" step="0.1">
+        </div>
+        <div class="sim-field">
+          <label>税率（%）</label>
+          <input type="number" id="sim-tax" value="17.2" min="0" max="50" step="0.1">
+        </div>
+        <div class="sim-field">
+          <label>インフレ率（%）</label>
+          <input type="number" id="sim-inflation" value="2" min="0" max="10" step="0.1">
+        </div>
+      </div>
+      <button class="sim-btn" onclick="runSimulation()">シミュレーション実行</button>
+
+      <div class="sim-results" id="sim-results" style="display:none;">
+        <div class="sim-result-card">
+          <div class="sim-result-value" id="res-final">--</div>
+          <div class="sim-result-label">最終資産（税引後）</div>
+        </div>
+        <div class="sim-result-card">
+          <div class="sim-result-value" id="res-gain" style="color:var(--accent)">--</div>
+          <div class="sim-result-label">運用益</div>
+        </div>
+        <div class="sim-result-card">
+          <div class="sim-result-value" id="res-real" style="color:var(--blue)">--</div>
+          <div class="sim-result-label">実質価値（インフレ調整）</div>
+        </div>
+      </div>
+
+      <div class="sim-canvas-wrap">
+        <canvas id="sim-chart"></canvas>
+        <div class="chart-tooltip" id="chart-tooltip"></div>
+      </div>
+
+      <div id="growthTableWrap"></div>
+      <div id="milestoneWrap"></div>
+    </div>
+
+    <div class="section-title">プリセット比較</div>
+    <div class="strategy-grid">
+      <div class="strat-card" onclick="applyPreset(100,6.14,20,0,17.2)">
+        <div class="strat-card-name" style="font-size:13px;">PEA標準</div>
+        <div class="strat-card-desc">100万, 6.14%, 20年, 税率17.2%</div>
+        <div class="strat-card-return green" style="font-size:16px;">289万</div>
+      </div>
+      <div class="strat-card" onclick="applyPreset(100,4,20,0,17.2)">
+        <div class="strat-card-name" style="font-size:13px;">PEA保守</div>
+        <div class="strat-card-desc">100万, 4%, 20年, 税率17.2%</div>
+        <div class="strat-card-return blue" style="font-size:16px;">200万</div>
+      </div>
+      <div class="strat-card" onclick="applyPreset(100,7,20,3.3,0)">
+        <div class="strat-card-name" style="font-size:13px;">NISA積立</div>
+        <div class="strat-card-desc">100万+月3.3万, 7%, 20年, 非課税</div>
+        <div class="strat-card-return green" style="font-size:16px;">2,107万</div>
+      </div>
+      <div class="strat-card" onclick="applyPreset(100,5,30,1,20.315)">
+        <div class="strat-card-name" style="font-size:13px;">長期分散</div>
+        <div class="strat-card-desc">100万+月1万, 5%, 30年, 課税20.3%</div>
+        <div class="strat-card-return blue" style="font-size:16px;">714万</div>
+      </div>
+    </div>
+
+    <!-- Currency Converter -->
+    <div class="section-title">通貨換算</div>
+    <div class="converter-card">
+      <div class="converter-row">
+        <div class="converter-input-wrap">
+          <input type="number" id="conv-jpy" value="1000000" oninput="convertCurrency('jpy')">
+          <span class="converter-currency">JPY</span>
+        </div>
+        <span class="converter-arrow">&#8596;</span>
+        <div class="converter-input-wrap">
+          <input type="number" id="conv-eur" oninput="convertCurrency('eur')">
+          <span class="converter-currency">EUR</span>
+        </div>
+      </div>
+      <div class="converter-result" id="conv-result">1 EUR = <span id="conv-rate">--</span> JPY (概算レート)</div>
+    </div>
+
+    <div class="disclaimer">
+      ※ シミュレーションは過去の実績に基づくものではなく、将来のリターンを保証するものではありません。税率・インフレ率は概算です。通貨換算は概算です。
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-page="strategy" onclick="switchPage('strategy')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/></svg>
+    <span>戦略</span>
+  </button>
+  <button class="nav-btn" data-page="research" onclick="switchPage('research')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+    <span>リサーチ</span>
+  </button>
+  <button class="nav-btn" data-page="ranking" onclick="switchPage('ranking')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+    <span>ランキング</span>
+  </button>
+  <button class="nav-btn" data-page="actions" onclick="switchPage('actions')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+    <span>アクション</span>
+  </button>
+  <button class="nav-btn" data-page="simulator" onclick="switchPage('simulator')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+    <span>試算</span>
+  </button>
+</nav>
+
+<script>
+// =========================
+// Toast
+// =========================
+function showToast(msg, duration) {
+  duration = duration || 2000;
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('visible');
+  setTimeout(function() { t.classList.remove('visible'); }, duration);
+}
+
+// =========================
+// Navigation
+// =========================
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelector('.nav-btn[data-page="' + name + '"]').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (name === 'simulator') {
+    setTimeout(function() { runSimulation(); }, 50);
+  }
+  // Save last active page
+  try { localStorage.setItem('inv-page', name); } catch(e) {}
+}
+
+// =========================
+// Accordion
+// =========================
+function toggleAccordion(header) {
+  var acc = header.parentElement;
+  acc.classList.toggle('open');
+}
+
+// =========================
+// Ranking Data
+// =========================
+var rankingData = [
+  { pos: 1, name: 'Notionテンプレート販売', cat: 'デジタル資産', stars: 5, income: '月3〜8万', hours: '1〜2h', color: 'var(--accent)' },
+  { pos: 2, name: '新NISA つみたて投資枠', cat: '投資・金融', stars: 5, income: '年4〜10%', hours: '0h', color: 'var(--green)' },
+  { pos: 3, name: '新NISA 成長投資枠', cat: '投資・金融', stars: 5, income: '年4〜12%', hours: '1h', color: 'var(--green)' },
+  { pos: 4, name: 'Kindle出版（電子書籍）', cat: 'プラットフォーム', stars: 5, income: '月1〜5万', hours: '0〜2h', color: 'var(--blue)' },
+  { pos: 5, name: 'Udemy/オンライン講座販売', cat: 'デジタル/PF', stars: 5, income: '月2〜8万', hours: '1〜2h', color: 'var(--accent)' },
+  { pos: 6, name: 'ガチャガチャ（カプセルトイ）', cat: 'リアルビジネス', stars: 5, income: '月6〜10万', hours: '2〜4h', color: 'var(--yellow)' },
+  { pos: 7, name: 'GPTs/AIチャットボット', cat: 'デジタル資産', stars: 4, income: '月1〜5万', hours: '1〜2h', color: 'var(--accent)' },
+  { pos: 8, name: 'Micro-SaaS', cat: 'デジタル資産', stars: 4, income: '月5〜15万', hours: '2〜3h', color: 'var(--accent)' },
+  { pos: 9, name: 'note/Brain 有料コンテンツ', cat: 'プラットフォーム', stars: 4, income: '月1〜5万', hours: '1〜3h', color: 'var(--blue)' },
+  { pos: 10, name: 'iDeCo（個人型確定拠出年金）', cat: '投資・金融', stars: 4, income: '実質年20〜30%', hours: '0h', color: 'var(--green)' },
+];
+
+function renderRanking() {
+  var container = document.getElementById('ranking-list');
+  container.innerHTML = rankingData.map(function(r) {
+    var posClass = r.pos === 1 ? 'gold' : r.pos === 2 ? 'silver' : r.pos === 3 ? 'bronze' : 'normal';
+    var barWidth = (r.stars / 5 * 100) + '%';
+    var starStr = Array(r.stars).fill('&#9733;').join('') + Array(5 - r.stars).fill('&#9734;').join('');
+    return '<div class="rank-item">' +
+      '<div class="rank-pos ' + posClass + '">' + r.pos + '</div>' +
+      '<div class="rank-info">' +
+        '<div class="rank-name">' + r.name + '</div>' +
+        '<div class="rank-meta">' + r.cat + ' / ' + r.income + ' / ' + r.hours + '</div>' +
+      '</div>' +
+      '<div class="rank-bar-wrap">' +
+        '<div class="rank-bar"><div class="rank-bar-fill" style="width:' + barWidth + ';background:' + r.color + '"></div></div>' +
+      '</div>' +
+      '<div class="rank-stars">' + starStr + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// =========================
+// Action Items (Checklist)
+// =========================
+var actionItems = [
+  { phase: 1, text: 'Boursorama（またはBourse Direct）でPEA口座の開設申請', locked: true },
+  { phase: 1, text: '同時にLivret Aを開設（PEA口座と同じ銀行で可）', locked: false },
+  { phase: 1, text: '100万円をユーロに両替（Wise推奨）', locked: true },
+  { phase: 2, text: 'PEA口座開設完了 → CW8（MSCI World）EUR 2,600分購入', locked: true },
+  { phase: 2, text: 'PE500（S&P 500）EUR 975分購入', locked: true },
+  { phase: 2, text: 'Livret AにEUR 650を入金', locked: false },
+  { phase: 2, text: 'Linxea Spirit 2でAssurance-vie口座を開設申請', locked: false },
+  { phase: 3, text: 'Assurance-vie開設完了 → UC株式型にEUR 1,950を投入', locked: true },
+  { phase: 3, text: 'EUR 325を普通預金に残す（緊急資金）', locked: false },
+  { phase: 3, text: '全口座のログイン情報を安全に保管', locked: false },
+  { phase: 3, text: '以降、年1回の残高確認以外は何もしない', locked: false },
+  { phase: 3, text: 'Kindle出版: KDPアカウント開設（任意）', locked: false },
+  { phase: 3, text: 'Kindle出版: 最初の5冊を執筆（任意）', locked: false },
+];
+
+function loadChecklist() {
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem('inv-checklist') || '{}'); } catch(e) {}
+
+  var containers = {
+    1: document.getElementById('phase1-items'),
+    2: document.getElementById('phase2-items'),
+    3: document.getElementById('phase3-items')
+  };
+
+  // Clear existing items
+  containers[1].innerHTML = '';
+  containers[2].innerHTML = '';
+  containers[3].innerHTML = '';
+
+  actionItems.forEach(function(item, idx) {
+    var checked = saved[idx] === true;
+    var el = document.createElement('div');
+    el.className = 'check-item' + (checked ? ' checked' : '');
+    el.dataset.idx = idx;
+    el.innerHTML =
+      '<div class="check-box">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>' +
+      '</div>' +
+      '<div>' +
+        (item.locked ? '<div class="check-phase">&#x1F512; 承認必要</div>' : '') +
+        '<div class="check-text">' + item.text + '</div>' +
+      '</div>';
+    el.addEventListener('click', function() {
+      var isChecked = el.classList.toggle('checked');
+      saved[idx] = isChecked;
+      localStorage.setItem('inv-checklist', JSON.stringify(saved));
+      updateProgress();
+    });
+    containers[item.phase].appendChild(el);
+  });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem('inv-checklist') || '{}'); } catch(e) {}
+  var total = actionItems.length;
+  var done = Object.values(saved).filter(function(v) { return v === true; }).length;
+  document.getElementById('progress-text').textContent = done + ' / ' + total;
+  document.getElementById('progress-bar').style.width = (total > 0 ? (done / total * 100) : 0) + '%';
+}
+
+function exportChecklist() {
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem('inv-checklist') || '{}'); } catch(e) {}
+  var data = { checklist: saved, exportedAt: new Date().toISOString(), version: '2.0' };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  var url = URL.createObjectURL(blob);
+  a.href = url;
+  a.download = 'investment-checklist-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+  showToast('エクスポートしました');
+}
+
+function importChecklist() {
+  var input = document.getElementById('importFile');
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        var data = JSON.parse(ev.target.result);
+        if (!data.checklist) throw new Error('Invalid format');
+        if (!confirm('現在の進捗を上書きしますか？')) return;
+        localStorage.setItem('inv-checklist', JSON.stringify(data.checklist));
+        loadChecklist();
+        showToast('インポートしました');
+      } catch (err) { showToast('インポートに失敗しました'); }
+    };
+    reader.readAsText(file);
+    input.value = '';
+  };
+  input.click();
+}
+
+function resetChecklist() {
+  if (!confirm('全チェックをリセットしますか？')) return;
+  localStorage.removeItem('inv-checklist');
+  loadChecklist();
+  showToast('リセットしました');
+}
+
+// =========================
+// Portfolio Simulator
+// =========================
+var simData = null;
+var simContribData = null;
+var simYears = 0;
+
+function applyPreset(amount, rate, years, monthly, tax) {
+  document.getElementById('sim-amount').value = amount;
+  document.getElementById('sim-rate').value = rate;
+  document.getElementById('sim-years').value = years;
+  document.getElementById('sim-monthly').value = monthly;
+  document.getElementById('sim-tax').value = tax;
+  switchPage('simulator');
+}
+
+function saveSimSettings() {
+  try {
+    localStorage.setItem('inv-sim', JSON.stringify({
+      amount: document.getElementById('sim-amount').value,
+      rate: document.getElementById('sim-rate').value,
+      years: document.getElementById('sim-years').value,
+      monthly: document.getElementById('sim-monthly').value,
+      tax: document.getElementById('sim-tax').value,
+      inflation: document.getElementById('sim-inflation').value
+    }));
+  } catch(e) {}
+}
+
+function loadSimSettings() {
+  try {
+    var s = JSON.parse(localStorage.getItem('inv-sim'));
+    if (!s) return;
+    if (s.amount) document.getElementById('sim-amount').value = s.amount;
+    if (s.rate) document.getElementById('sim-rate').value = s.rate;
+    if (s.years) document.getElementById('sim-years').value = s.years;
+    if (s.monthly) document.getElementById('sim-monthly').value = s.monthly;
+    if (s.tax) document.getElementById('sim-tax').value = s.tax;
+    if (s.inflation) document.getElementById('sim-inflation').value = s.inflation;
+  } catch(e) {}
+}
+
+function runSimulation() {
+  var amount = parseFloat(document.getElementById('sim-amount').value) || 100;
+  var rate = (parseFloat(document.getElementById('sim-rate').value) || 6) / 100;
+  var years = parseInt(document.getElementById('sim-years').value) || 20;
+  var monthly = parseFloat(document.getElementById('sim-monthly').value) || 0;
+  var taxRate = (parseFloat(document.getElementById('sim-tax').value) || 0) / 100;
+  var inflation = (parseFloat(document.getElementById('sim-inflation').value) || 2) / 100;
+
+  // Calculate yearly data
+  var data = [];
+  var balance = amount;
+  var totalContrib = [];
+  var cumContrib = amount;
+
+  for (var y = 0; y <= years; y++) {
+    data.push(balance);
+    totalContrib.push(cumContrib);
+    if (y < years) {
+      balance = balance * (1 + rate) + monthly * 12;
+      cumContrib += monthly * 12;
+    }
+  }
+
+  // Store for tooltip
+  simData = data;
+  simContribData = totalContrib;
+  simYears = years;
+
+  // Tax-adjusted final
+  var grossGain = balance - cumContrib;
+  var taxAmount = grossGain > 0 ? grossGain * taxRate : 0;
+  var finalAfterTax = balance - taxAmount;
+
+  // Inflation-adjusted
+  var realValue = finalAfterTax / Math.pow(1 + inflation, years);
+
+  // Show results
+  document.getElementById('sim-results').style.display = '';
+  document.getElementById('res-final').textContent = formatMoney(finalAfterTax) + '万';
+  document.getElementById('res-gain').textContent = '+' + formatMoney(grossGain > 0 ? grossGain - taxAmount : 0) + '万';
+  document.getElementById('res-real').textContent = formatMoney(realValue) + '万';
+
+  // Draw chart
+  drawChart(data, totalContrib, years);
+
+  // Render growth table
+  renderGrowthTable(data, totalContrib, years, rate, taxRate, inflation);
+
+  // Render milestones
+  renderMilestones(data, totalContrib, years, amount);
+
+  // Save settings
+  saveSimSettings();
+}
+
+function formatMoney(v) {
+  if (v >= 10000) return (v / 10000).toFixed(1) + '億';
+  return Math.round(v).toLocaleString();
+}
+
+function drawChart(data, contribData, years) {
+  var canvas = document.getElementById('sim-chart');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  var rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  var W = rect.width;
+  var H = rect.height;
+
+  // Clear
+  ctx.clearRect(0, 0, W, H);
+
+  // Padding
+  var pL = 55, pR = 16, pT = 20, pB = 36;
+  var cW = W - pL - pR;
+  var cH = H - pT - pB;
+
+  var maxVal = Math.max.apply(null, data) * 1.1;
+  var minVal = 0;
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(40,40,80,0.4)';
+  ctx.lineWidth = 1;
+  var gridCount = 5;
+  ctx.font = '10px -apple-system, sans-serif';
+  ctx.fillStyle = '#5c6074';
+  ctx.textAlign = 'right';
+
+  for (var i = 0; i <= gridCount; i++) {
+    var y = pT + (cH / gridCount) * i;
+    var val = maxVal - (maxVal - minVal) * (i / gridCount);
+    ctx.beginPath();
+    ctx.moveTo(pL, y);
+    ctx.lineTo(pL + cW, y);
+    ctx.stroke();
+    ctx.fillText(Math.round(val) + '万', pL - 8, y + 4);
+  }
+
+  // X labels
+  ctx.textAlign = 'center';
+  var step = years <= 10 ? 1 : years <= 20 ? 2 : 5;
+  for (var xi = 0; xi <= years; xi += step) {
+    var x = pL + (xi / years) * cW;
+    ctx.fillText(xi + '年', x, H - 8);
+  }
+
+  // Contribution area
+  ctx.beginPath();
+  for (var ci = 0; ci <= years; ci++) {
+    var cx = pL + (ci / years) * cW;
+    var cy = pT + cH - (contribData[ci] / maxVal) * cH;
+    ci === 0 ? ctx.moveTo(cx, cy) : ctx.lineTo(cx, cy);
+  }
+  ctx.lineTo(pL + cW, pT + cH);
+  ctx.lineTo(pL, pT + cH);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(90,160,240,0.1)';
+  ctx.fill();
+
+  // Growth area
+  ctx.beginPath();
+  for (var gi = 0; gi <= years; gi++) {
+    var gx = pL + (gi / years) * cW;
+    var gy = pT + cH - (data[gi] / maxVal) * cH;
+    gi === 0 ? ctx.moveTo(gx, gy) : ctx.lineTo(gx, gy);
+  }
+  ctx.lineTo(pL + cW, pT + cH);
+  ctx.lineTo(pL, pT + cH);
+  ctx.closePath();
+  var grad = ctx.createLinearGradient(0, pT, 0, pT + cH);
+  grad.addColorStop(0, 'rgba(155,109,255,0.25)');
+  grad.addColorStop(1, 'rgba(155,109,255,0.01)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Growth line
+  ctx.beginPath();
+  for (var li = 0; li <= years; li++) {
+    var lx = pL + (li / years) * cW;
+    var ly = pT + cH - (data[li] / maxVal) * cH;
+    li === 0 ? ctx.moveTo(lx, ly) : ctx.lineTo(lx, ly);
+  }
+  ctx.strokeStyle = '#9b6dff';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Contribution line
+  ctx.beginPath();
+  for (var di = 0; di <= years; di++) {
+    var dx = pL + (di / years) * cW;
+    var dy = pT + cH - (contribData[di] / maxVal) * cH;
+    di === 0 ? ctx.moveTo(dx, dy) : ctx.lineTo(dx, dy);
+  }
+  ctx.strokeStyle = '#5aa0f0';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // End dot
+  var endX = pL + cW;
+  var endY = pT + cH - (data[years] / maxVal) * cH;
+  ctx.beginPath();
+  ctx.arc(endX, endY, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#9b6dff';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(endX, endY, 9, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(155,109,255,0.3)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Legend
+  ctx.font = '10px -apple-system, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#9b6dff';
+  ctx.fillRect(pL, pT - 14, 12, 3);
+  ctx.fillStyle = '#9094ad';
+  ctx.fillText('総資産', pL + 16, pT - 10);
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(pL + 70, pT - 12);
+  ctx.lineTo(pL + 82, pT - 12);
+  ctx.strokeStyle = '#5aa0f0';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#9094ad';
+  ctx.fillText('元本合計', pL + 86, pT - 10);
+
+  // Store chart layout for tooltip
+  canvas._chartLayout = { pL: pL, pR: pR, pT: pT, pB: pB, cW: cW, cH: cH, maxVal: maxVal };
+}
+
+// =========================
+// Chart Tooltip
+// =========================
+(function() {
+  var canvas = null;
+  var tooltip = null;
+
+  function initTooltip() {
+    canvas = document.getElementById('sim-chart');
+    tooltip = document.getElementById('chart-tooltip');
+    if (!canvas || !tooltip) return;
+
+    canvas.addEventListener('mousemove', handleMove);
+    canvas.addEventListener('touchmove', handleTouch, { passive: false });
+    canvas.addEventListener('mouseleave', hideTooltip);
+    canvas.addEventListener('touchend', hideTooltip);
+  }
+
+  function handleTouch(e) {
+    e.preventDefault();
+    var touch = e.touches[0];
+    var rect = canvas.getBoundingClientRect();
+    showTooltipAt(touch.clientX - rect.left, touch.clientY - rect.top);
+  }
+
+  function handleMove(e) {
+    var rect = canvas.getBoundingClientRect();
+    showTooltipAt(e.clientX - rect.left, e.clientY - rect.top);
+  }
+
+  function showTooltipAt(mx, my) {
+    if (!simData || !canvas._chartLayout) return;
+    var L = canvas._chartLayout;
+    var yearFloat = ((mx - L.pL) / L.cW) * simYears;
+    var yearIdx = Math.round(yearFloat);
+    if (yearIdx < 0 || yearIdx > simYears) { hideTooltip(); return; }
+
+    var total = simData[yearIdx];
+    var contrib = simContribData[yearIdx];
+    var gain = total - contrib;
+
+    tooltip.innerHTML =
+      '<div style="font-weight:800;margin-bottom:3px;">' + yearIdx + '年目</div>' +
+      '<div style="color:#9b6dff">総資産: ' + formatMoney(total) + '万</div>' +
+      '<div style="color:#5aa0f0">元本: ' + formatMoney(contrib) + '万</div>' +
+      '<div style="color:' + (gain >= 0 ? '#43d9a0' : '#ff5c72') + '">利益: ' + (gain >= 0 ? '+' : '') + formatMoney(gain) + '万</div>';
+    tooltip.classList.add('visible');
+
+    // Position tooltip
+    var wrapRect = canvas.parentElement.getBoundingClientRect();
+    var tx = mx + 12;
+    var ty = my - 10;
+    if (tx + 140 > wrapRect.width) tx = mx - 150;
+    if (ty < 0) ty = 10;
+    tooltip.style.left = tx + 'px';
+    tooltip.style.top = ty + 'px';
+  }
+
+  function hideTooltip() {
+    if (tooltip) tooltip.classList.remove('visible');
+  }
+
+  // Init after DOM ready
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(initTooltip, 100);
+  });
+})();
+
+// =========================
+// Year-by-Year Growth Table
+// =========================
+function renderGrowthTable(data, contribData, years, rate, taxRate, inflation) {
+  var el = document.getElementById('growthTableWrap');
+
+  var step = years <= 10 ? 1 : years <= 20 ? 2 : 5;
+  var rows = '';
+  for(var y = 0; y <= years; y += step) {
+    var total = data[y];
+    var contrib = contribData[y];
+    var gain = total - contrib;
+    var rowStyle = y === years ? ' style="background:rgba(155,109,255,0.06);font-weight:700"' : '';
+    rows += '<tr' + rowStyle + '>' +
+      '<td>' + y + '年</td>' +
+      '<td style="color:var(--accent)">' + formatMoney(total) + '万</td>' +
+      '<td style="color:var(--text-dim)">' + formatMoney(contrib) + '万</td>' +
+      '<td style="color:' + (gain>=0?'var(--green)':'var(--red)') + '">' + (gain>=0?'+':'') + formatMoney(gain) + '万</td>' +
+    '</tr>';
+  }
+  // Always include final year if not already
+  if(years % step !== 0) {
+    var ft = data[years];
+    var fc = contribData[years];
+    var fg = ft - fc;
+    rows += '<tr style="background:rgba(155,109,255,0.06);font-weight:700">' +
+      '<td>' + years + '年</td>' +
+      '<td style="color:var(--accent)">' + formatMoney(ft) + '万</td>' +
+      '<td style="color:var(--text-dim)">' + formatMoney(fc) + '万</td>' +
+      '<td style="color:' + (fg>=0?'var(--green)':'var(--red)') + '">' + (fg>=0?'+':'') + formatMoney(fg) + '万</td>' +
+    '</tr>';
+  }
+
+  el.innerHTML =
+    '<div style="font-size:13px;font-weight:700;color:var(--text);margin:16px 0 8px">年次成長テーブル</div>' +
+    '<div style="overflow-x:auto">' +
+      '<table class="growth-table">' +
+        '<thead><tr><th>年</th><th>総資産</th><th>元本</th><th>利益</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>' +
+    '</div>';
+}
+
+// =========================
+// Milestone Tracker
+// =========================
+function renderMilestones(data, contribData, years, initialAmount) {
+  var el = document.getElementById('milestoneWrap');
+
+  var milestones = [
+    { label: '1.5x (元本の1.5倍)', target: initialAmount * 1.5, icon: '&#127941;' },
+    { label: '2x (元本の2倍)', target: initialAmount * 2, icon: '&#127942;' },
+    { label: '3x (元本の3倍)', target: initialAmount * 3, icon: '&#128293;' },
+    { label: '200万円', target: 200, icon: '&#128176;' },
+    { label: '500万円', target: 500, icon: '&#128176;' },
+    { label: '1,000万円', target: 1000, icon: '&#127775;' },
+  ];
+
+  var reached = [];
+  milestones.forEach(function(m) {
+    for(var y = 0; y <= years; y++) {
+      if(data[y] >= m.target) {
+        reached.push({ label: m.label, target: m.target, icon: m.icon, year: y });
+        break;
+      }
+    }
+  });
+
+  var unreached = milestones.filter(function(m) { return !reached.some(function(r) { return r.label === m.label; }); });
+
+  if(reached.length === 0 && unreached.length === 0) {
+    el.innerHTML = '';
+    return;
+  }
+
+  var html = '<div style="font-size:13px;font-weight:700;color:var(--text);margin:16px 0 10px">マイルストーン</div>' +
+    '<div style="display:flex;flex-direction:column;gap:6px">';
+
+  reached.forEach(function(m) {
+    html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(67,217,160,0.06);border:1px solid rgba(67,217,160,0.15);border-radius:10px">' +
+      '<span style="font-size:1.2rem">' + m.icon + '</span>' +
+      '<div style="flex:1">' +
+        '<div style="font-size:12px;font-weight:700;color:var(--green)">' + m.label + '</div>' +
+        '<div style="font-size:10px;color:var(--text-muted)">' + m.year + '年目に達成 (' + formatMoney(m.target) + '万)</div>' +
+      '</div>' +
+      '<span style="font-size:11px;color:var(--green);font-weight:800">&#10003;</span>' +
+    '</div>';
+  });
+
+  unreached.slice(0,3).forEach(function(m) {
+    html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(92,96,116,0.06);border:1px solid var(--glass-border);border-radius:10px;opacity:0.5">' +
+      '<span style="font-size:1.2rem">' + m.icon + '</span>' +
+      '<div style="flex:1">' +
+        '<div style="font-size:12px;font-weight:600;color:var(--text-dim)">' + m.label + '</div>' +
+        '<div style="font-size:10px;color:var(--text-muted)">' + years + '年以内に未達成</div>' +
+      '</div>' +
+      '<span style="font-size:11px;color:var(--text-muted)">&#9711;</span>' +
+    '</div>';
+  });
+
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+// =========================
+// Currency Converter
+// =========================
+var EUR_JPY_RATE = 163; // Approximate rate
+
+function convertCurrency(from) {
+  document.getElementById('conv-rate').textContent = EUR_JPY_RATE;
+  if (from === 'jpy') {
+    var jpy = parseFloat(document.getElementById('conv-jpy').value) || 0;
+    document.getElementById('conv-eur').value = (jpy / EUR_JPY_RATE).toFixed(2);
+  } else {
+    var eur = parseFloat(document.getElementById('conv-eur').value) || 0;
+    document.getElementById('conv-jpy').value = Math.round(eur * EUR_JPY_RATE);
+  }
+}
+
+// =========================
+// Init
+// =========================
+document.addEventListener('DOMContentLoaded', function() {
+  renderRanking();
+  loadChecklist();
+  loadSimSettings();
+
+  // Init currency converter
+  convertCurrency('jpy');
+
+  // Restore last active page
+  try {
+    var lastPage = localStorage.getItem('inv-page');
+    if (lastPage && document.getElementById('page-' + lastPage)) {
+      switchPage(lastPage);
+    }
+  } catch(e) {}
+
+  // Resize handler for canvas
+  var resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      if (document.getElementById('page-simulator').classList.contains('active')) {
+        runSimulation();
+      }
+    }, 200);
+  });
+});
+</script>
+</body>
+</html>
